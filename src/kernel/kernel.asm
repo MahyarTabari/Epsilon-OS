@@ -1,7 +1,7 @@
 [BITS 32]
 
-% define KERNEL_CODE_SEG 0x08           
-% define KERNEL_DATA_SEG 0X10
+KERNEL_CODE_SEG equ 0x08           
+KERNEL_DATA_SEG equ 0X10
 
 global _start
 extern kmain
@@ -14,6 +14,8 @@ _start:
     mov gs, ax
     mov es, ax
     mov ss, ax
+    mov ebp, 0x200000
+    mov esp, ebp
 
     ; enable A20 line
     in al, 0x92         ; read form port 0x92 into al

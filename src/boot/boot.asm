@@ -78,15 +78,25 @@
 
 
 
+ORG 0X7C00
+BITS 16
 
+KERNEL_CODE_SEG equ 0x08           
+KERNEL_DATA_SEG equ 0X10
 
-[org 0x7c00]
+_start:
+    jmp short start
+    nop
 
+times 33 db 0
+
+start:
+    jmp 0:next_step
+
+;extern _start
 ; Note: segments in protected mode are used as an offset of GDT for fidnig the segment discriptor
 ; kernel code segment is the second one in GDT, and
 ; kernele data segment is the third one
-% define KERNEL_CODE_SEG 0x08           
-% define KERNEL_DATA_SEG 0X10
 
 ;--------------------------------------------------
 ; Setting Segment Registers In Real Mode
@@ -129,14 +139,13 @@
 ; Note 2: It is not possible move immediate into segment registers,
 ; First move immediate into a global register and mov that register into the segment register
 ;
-
+next_step:
 ; clear interrupt
 cli
 
 ; Set DS, CS and ES to 0x7c00
 mov ax, 0x0000
 mov ds, ax
-mov cs, ax
 mov es, ax
 mov ss, ax
 
@@ -150,6 +159,46 @@ sti
 
 
 
+
+;--------------------------------------------------------
+; Enabling Protected Mode:
+;   
+;   follow these steps:
+;       1. clear interrupts:
+;           because it is a critical operation, so we are not going to answer any interrupts.
+;
+;       2. enable A20 line:
+;           because we want to load the kernel into address 0x0100000(which needs the 21'th bit to be enabled).
+;
+;       3. load GDT:
+;           because in protected mode the cpu must know where it is going to access and what is the permissions of it
+;           ,but be aware that we set the gdt to defaults because we are not going to use segmented memory.
+;           we only need to tell the cpu that we have access to memory,
+;           later on we use paging for memory management
+;
+;--------------------------------------------------------
+
+
+; we want to switch the processor state,
+; so it is necessary to disable interrupts
+cli
+
+; load global discriptor register with the contents specified in the address load_gdtr label
+lgdt [load_gdtr]
+
+; the lsb of cr0(control register of CPU) is called protection enable,
+; protection enable bit:
+;       0: real mode
+;       1: protected mode
+
+mov eax, cr0
+
+; make the lowest bit 1
+or eax, 1
+mov cr0, eax
+
+ jmp 0x08:load32
+; now we are in protected mode
 
 
 
@@ -340,59 +389,35 @@ data_segment_discriptor:
 gdt_end:
 
 load_gdtr:
-    dw gdt_end - gdt_start      ; 0-15:     size
+    dw gdt_end - gdt_start - 1      ; 0-15:     size
     dd gdt_start                ; 16-47:    offset(relative address of the GDT)
 
 
 
 
-
-
-
-
-
-;--------------------------------------------------------
-; Enabling Protected Mode:
-;   
-;   follow these steps:
-;       1. clear interrupts:
-;           because it is a critical operation, so we are not going to answer any interrupts.
-;
-;       2. enable A20 line:
-;           because we want to load the kernel into address 0x0100000(which needs the 21'th bit to be enabled).
-;
-;       3. load GDT:
-;           because in protected mode the cpu must know where it is going to access and what is the permissions of it
-;           ,but be aware that we set the gdt to defaults because we are not going to use segmented memory.
-;           we only need to tell the cpu that we have access to memory,
-;           later on we use paging for memory management
-;
-;--------------------------------------------------------
-
-; we want to switch the processor state,
-; so it is necessary to disable interrupts
-cli
-
-; load global discriptor register with the contents specified in the address load_gdtr label
-lgdt [load_gdtr]
-
-; the lsb of cr0(control register of CPU) is called protection enable,
-; protection enable bit:
-;       0: real mode
-;       1: protected mode
-
-mov eax, cr0
-; make the lowest bit 1
-or eax, 1
-mov cr0, eax
-
-; now we are in protected mode
 [BITS 32]
+load32:
 
-mov ebx, 0x00000001
+; cylinder = 0
+; Head	   = 0
+; sector   = 2 (sector 1 is MBR)
+mov ebx, 2
+
+; # sectors to read = 100
+xor ecx, ecx
 mov ch, 100
 
+; the address we want to load the kernel into
+mov edi, 0x0100000
+
+
+;;; for ata_lba ;;;
+;mov eax, 1
+;mov ecx, 100
+;mov edi, 0x0100000
+
 call ata_chs_read
+
 ; jump to the kernel code.
 ; we use the KERNEL_CODE_SEG segment which is the offset to the GDT,
 ; the second entry because the first one is null and reserved,
@@ -401,7 +426,7 @@ call ata_chs_read
 ; Note: in protected mode the segment part of the address is offset to GDT.
 
 ; _start is the entry point of kerenl 
-jmp KERNEL_CODE_SEG:_start
+jmp KERNEL_CODE_SEG:0x0100000
 
 
 
@@ -432,44 +457,46 @@ jmp KERNEL_CODE_SEG:_start
 ;                                    that we want to read from the disk
 ;
 
-ata_chs_read:
 
+ata_chs_read:
     push eax
     push ebx
     push ecx
     push edx
-    push rdi
+    push edi
 
 
-    mov al, bl                  ; starting sector
+    mov eax, ebx
+    and ah, 0b00001111          ; only keep the lower nibble(which is head)
+    or ah, 0b10100000           ; make the higher nibble 0b1010 for reading from the disk
+    mov dx, 0x1f6
+    mov al, ah
+    out dx, al
+    
+    mov al, ch          	; number of sectors to read
+    mov dx, 0x1f2
+    out dx, al
+    
+    mov eax, ebx                ; starting sector
     mov dx, 0x1f3
     out dx, al
 
-    mov al, bh
-    and al, 0b00001111          ; only keep the lower nibble(which is head)
-    or al, 0b10100000           ; make the higher nibble 0b1010 for reading from the disk
-    mov dx, 0x1f6
-    out dx, al
-
-
-    mov eax, ebx        ; cylinder low byte
+    mov eax, ebx         	; cylinder low byte
     shr eax, 16
     mov dx, 0x1f4
     out dx, al
 
-    mov dx, 0x1f5
-    out dx, ah
-
-    mov al, ch          ; number of sectors to read
-    mov dx, 0x1f2
+    mov dx, 0x1f5		; cylinder high byte
+    shr eax, 8
     out dx, al
 
-    mov al, 0x20
+
+    mov al, 0x20		; read with retry command
     mov dx, 0x1f7
     out dx, al
 
 .loop:
-    in dx, al
+    in al, dx		
     test al, 8
     jz .loop
 
@@ -477,24 +504,24 @@ ata_chs_read:
 
     xor ebx, ebx        ; make ebx 0
     mov bl, ch          ; bl contains the number of sectors to read     
-    mul bl              ; al = al * bl : total_number_of_word = number_of_words_in_sector * numbr_of_sector
+    mul bx              ; al = al * bl : total_number_of_word = number_of_words_in_sector * numbr_of_sector
 
-    mov rcx, rax        ; rep instruction repeats insw 'rcx' times
+    mov ecx, eax        ; rep instruction repeats insw 'rcx' times
                         ; (i.e. it reads n words where n is the total number of words to read)
+    mov edx, 0x1f0
+    rep insw            ; [es:edi] <- word_read_from_disk , edi <- edi + 2(becuase we are reading word(2bytes))
 
-    rep insw            ; [es:rdi] <- word_read_from_disk , rdi <- rdi + 2(becuase we are reading word(2bytes))
 
-
-    pop rdi
+    pop edi
     pop edx
     pop ecx
     pop ebx
     pop eax
 
-    popfq
-
     ret
-
+    
+    
+    
 ; Padding Remaining Bytes Of The Sector With Zero - except last 2 bytes for boot signature
 times 510-($-$$) db 0
 
