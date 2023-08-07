@@ -5,11 +5,12 @@ export PATH="$PREFIX/bin:$PATH"
 
 # if ./build or ./bin directories don't exist, create them
 # these are needed for build process
-if ![ -d ./build ]; then
-	mkdir bin
+if [[ ! -d ./build ]]; then
+	mkdir build
+	mkdir ./build/include
 fi
 
-if ![ -d ./bin ]; then
+if [[ ! -d ./bin ]]; then
 	mkdir bin
 fi
 
