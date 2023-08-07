@@ -8,6 +8,7 @@ export PATH="$PREFIX/bin:$PATH"
 if [[ ! -d ./build ]]; then
 	mkdir build
 	mkdir ./build/include
+
 fi
 
 if [[ ! -d ./bin ]]; then
