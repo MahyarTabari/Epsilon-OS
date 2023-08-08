@@ -4,6 +4,7 @@ KERNEL_CODE_SEG equ 0x08
 KERNEL_DATA_SEG equ 0X10
 
 global _start
+global division_zero
 extern kmain
 
 _start:
@@ -29,3 +30,13 @@ _start:
 
 ; Align to fill one sector
 times 512-($-$$) db 0
+
+division_zero:
+    push ebp
+    mov ebp, esp
+
+    mov eax, 0
+    div eax
+
+    pop ebp
+    ret

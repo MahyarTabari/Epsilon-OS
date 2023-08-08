@@ -7,7 +7,9 @@ export PATH="$PREFIX/bin:$PATH"
 # these are needed for build process
 if [[ ! -d ./build ]]; then
 	mkdir build
+	mkdir ./build/kernel
 	mkdir ./build/include
+	mkdir ./build/memory
 
 fi
 

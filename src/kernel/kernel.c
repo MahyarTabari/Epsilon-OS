@@ -2,11 +2,16 @@
 #include <stdint.h>
 #include "../include/vga.h"
 #include "../include/type.h"
-
+#include "idt.h"
+#include "config.h"
 
 int current_video_memory_row = 0;
 int current_video_memory_col = 0;
 
+
+// test function for interrupt 0,
+// defined in "kernel.asm"
+extern void division_zero();
 
 /*
  * calculates the length of the given string 
@@ -138,12 +143,23 @@ void print_str_terminal(char* str)
     return;
 }
 
+
+// test function for IDT
+void division_by_zero_interrupt()
+{
+    print_str_terminal("division by zero interrupt\n");
+}
+
 void kmain()
 {
 
     initialize_terminal();
 
-    print_str_terminal("Hello World!");
+    initialize_idt();
 
+    set_interrupt(0, INTERRUPT_GATE_32, RING_3, division_by_zero_interrupt);
+    
+    division_zero();
 
+    while(1);
 }
