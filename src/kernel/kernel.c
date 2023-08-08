@@ -2,12 +2,13 @@
 #include <stdint.h>
 #include "../include/vga.h"
 #include "../include/type.h"
-
+#include "idt.h"
+#include "config.h"
 
 int current_video_memory_row = 0;
 int current_video_memory_col = 0;
 
-
+extern void division_zero();
 /*
  * calculates the length of the given string 
  * 
@@ -138,6 +139,11 @@ void print_str_terminal(char* str)
     return;
 }
 
+void devision_by_zerro_interrupt()
+{
+    print_str_terminal("Devision by Zero Exception");
+}
+
 void kmain()
 {
 
@@ -145,5 +151,9 @@ void kmain()
 
     print_str_terminal("Hello World!");
 
+    initialize_idt();
 
+    set_interrupt(0, TRAP_GATE_32, RING_0, devision_by_zerro_interrupt);
+
+    division_zero();
 }
