@@ -10,6 +10,7 @@ if [[ ! -d ./build ]]; then
 	mkdir ./build/kernel
 	mkdir ./build/include
 	mkdir ./build/memory
+	mkdir ./build/io
 
 fi
 

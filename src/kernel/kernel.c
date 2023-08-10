@@ -4,7 +4,7 @@
 #include "../include/type.h"
 #include "idt.h"
 #include "config.h"
-
+#include "../io/io.h"
 int current_video_memory_row = 0;
 int current_video_memory_col = 0;
 
@@ -157,9 +157,11 @@ void kmain()
 
     initialize_idt();
 
+    print_str_terminal("hello world");
     set_interrupt(0, INTERRUPT_GATE_32, RING_3, division_by_zero_interrupt);
     
-    division_zero();
+    //division_zero();
 
-    while(1);
+    outb(0x20, 0xff);
+    
 }

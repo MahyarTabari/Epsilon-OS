@@ -1,4 +1,4 @@
-OBJECT_FILES  = ./build/kernel/kernel.asm.o ./build/kernel/kernel.o ./build/include/vga.o ./build/kernel/idt.asm.o ./build/memory/memory.o ./build/kernel/idt.o
+OBJECT_FILES  = ./build/kernel/kernel.asm.o ./build/kernel/kernel.o ./build/include/vga.o ./build/kernel/idt.asm.o ./build/memory/memory.o ./build/kernel/idt.o ./build/io/io.asm.o
 FLAGS = -g -ffreestanding -falign-jumps -falign-functions -falign-labels -falign-loops -fstrength-reduce -fomit-frame-pointer -finline-functions -Wno-unused-function -fno-builtin -Werror -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostdlib -nostartfiles -nodefaultlibs -Wall -O0
 INCLUDES = -I./src
 
@@ -17,6 +17,9 @@ all: ./bin/boot.bin ./bin/kernel.bin
 
 ./build/kernel/idt.asm.o:
 	nasm -f elf -g ./src/kernel/idt.asm -o ./build/kernel/idt.asm.o
+
+./build/io/io.asm.o:
+	nasm -f elf -g ./src/io/io.asm -o ./build/io/io.asm.o
 
 ./build/kernel/kernel.o:
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/kernel.c -o ./build/kernel/kernel.o
