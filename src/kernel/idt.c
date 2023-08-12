@@ -81,12 +81,27 @@ void set_idtr()
  * @param   color       color is macro defined in "vga.h"       
  * @return  void    
  */
+
+extern void no_interrupt_handler();
+extern void division_by_zero_interrupt_handler();
+extern void keyboard_irq_handler();
 void initialize_idt()
 {
     set_idtr();
 
-    load_idtr(&idtr_desc);
-    
     memset(idt, 0, sizeof(idt));
+    //memset(idt, 0, EPSILONOS_TOTAL_INTERRUPTS * 8);
+    // initalize each interrupt with a code that sends EOI(end of interrupt command) to IRQ's 
+    for (int i = 0 ; i < EPSILONOS_TOTAL_INTERRUPTS ; i++)
+    {
+        set_interrupt(i, INTERRUPT_GATE_32, RING_3, no_interrupt_handler);
+    }
+
+    set_interrupt(0, INTERRUPT_GATE_32, RING_3, division_by_zero_interrupt_handler);
+
+    // set interrupt for keyboard(IRQ 1)
+    set_interrupt(0x21, INTERRUPT_GATE_32, RING_3, keyboard_irq_handler);
+
+    load_idtr(&idtr_desc);
 }
 

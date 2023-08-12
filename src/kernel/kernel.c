@@ -145,23 +145,34 @@ void print_str_terminal(char* str)
 
 
 // test function for IDT
-void division_by_zero_interrupt()
+void division_by_zero_interrupt_code()
 {
     print_str_terminal("division by zero interrupt\n");
 }
+
+
+void keyboard_irq_code()
+{
+    print_str_terminal("keybaord is pressed!\n");
+}
+
 
 void kmain()
 {
 
     initialize_terminal();
-
+    print_str_terminal("we are in main\n");
     initialize_idt();
+    print_str_terminal("idt is initialized\n");
 
-    print_str_terminal("hello world");
-    set_interrupt(0, INTERRUPT_GATE_32, RING_3, division_by_zero_interrupt);
-    
-    //division_zero();
+    // enabling interrupts using sti instruction is needed,
+    // otherwise interrupts will be ignored
+    enable_interrupts();
+    print_str_terminal("interrupts are enabled\n");
 
-    outb(0x20, 0xff);
-    
+    // int 0-31 are working,
+    // but int 32-47 (IRQ's) are not working
+    // it seems that the problem is due to mapping in kernel.asm 
+    test_interrupt();
+
 }
