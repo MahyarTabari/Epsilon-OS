@@ -4,11 +4,14 @@
 
 
 // used for gate_type in set_interrupt function
-#define TASK_GATE               0x5
-#define INTERRUPT_GATE_16       0x6
-#define TRAP_GATE_16            0x7
-#define INTERRUPT_GATE_32       0xE
-#define TRAP_GATE_32            0xF
+#define TASK_GATE               0x05
+#define INTERRUPT_GATE_16       0x06
+#define TRAP_GATE_16            0x07
+#define INTERRUPT_GATE_32       0x0E
+#define TRAP_GATE_32            0x0F
+
+#define IRQ_TIMER               2
+#define IRQ_KEYBOARD            1         
 
 // check the below link for more information
 // https://wiki.osdev.org/Interrupt_Descriptor_Table
@@ -35,5 +38,11 @@ void set_idtr();
 // defined in "idt.asm"
 extern void load_idtr(struct idtr_descriptor* idtr_addr);
 
+
 void initialize_idt();
+
+void enable_interrupts();
+
+void disable_interrupts();
+
 #endif

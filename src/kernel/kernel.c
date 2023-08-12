@@ -4,7 +4,7 @@
 #include "../include/type.h"
 #include "idt.h"
 #include "config.h"
-
+#include "../io/io.h"
 int current_video_memory_row = 0;
 int current_video_memory_col = 0;
 
@@ -145,21 +145,34 @@ void print_str_terminal(char* str)
 
 
 // test function for IDT
-void division_by_zero_interrupt()
+void division_by_zero_interrupt_code()
 {
     print_str_terminal("division by zero interrupt\n");
 }
+
+
+void keyboard_irq_code()
+{
+    print_str_terminal("keybaord is pressed!\n");
+}
+
 
 void kmain()
 {
 
     initialize_terminal();
-
+    print_str_terminal("we are in main\n");
     initialize_idt();
+    print_str_terminal("idt is initialized\n");
 
-    set_interrupt(0, INTERRUPT_GATE_32, RING_3, division_by_zero_interrupt);
-    
-    division_zero();
+    // enabling interrupts using sti instruction is needed,
+    // otherwise interrupts will be ignored
+    enable_interrupts();
+    print_str_terminal("interrupts are enabled\n");
 
-    while(1);
+    // int 0-31 are working,
+    // but int 32-47 (IRQ's) are not working
+    // it seems that the problem is due to mapping in kernel.asm 
+    test_interrupt();
+
 }

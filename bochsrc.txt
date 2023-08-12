@@ -1,0 +1,11 @@
+romimage: file=/usr/share/bochs/BIOS-bochs-latest
+# VGA configuration
+vgaromimage: file=/usr/share/bochs/VGABIOS-lgpl-latest
+# Boot from image
+boot: disk
+# Disk image configuration
+ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
+ata0-master: type=disk, path="/home/vboxuser/Documents/OS/bin/os.bin", mode=flat
+# Memory configuration
+megs: 32
+
