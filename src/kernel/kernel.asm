@@ -26,59 +26,24 @@ _start:
     ; enable A20 line
     in al, 0x92         ; read form port 0x92 into al
     or al, 2            ; set the second lowest bit of al
-    ;out 0x92, al        ; write to that port
-;
-    ;; enable master's IRQ
-    ;mov al, 00010001b
-    ;out 0x20, al
-    ;
-    ;; set IRQ's to INT 32 and so on
-    ;mov al, 0x20
-    ;out 0x21, al
-    ;
-    ;; tell the IRQ start handling interrupts
-    ;mov al, 0b00000001
-    ;out 0x21, al
-;
+    out 0x92, al        ; write to that port
 
-%define ICW1 0x11
-%define ICW4 0x01
-%define PIC1 0x20
-%define PIC2 0xA0
-%define PIC_EOI 0x20
 
-    mov al, ICW1
-    out PIC1, al
+    ;; Remapping IRQ
+    ;; we need to remap IRQ's to interrupts 32 to 47
+    ;; for more information check http://www.brokenthorn.com/Resources/OSDevPic.html
 
-    mov al, ICW1
-    out PIC2, al
+    mov al, 00010001b
+    out 0x20, al
+    
+    ; set IRQ's to INT 32 and so on
+    mov al, 0x20
+    out 0x21, al
+    
+    ; tell the IRQ start handling interrupts
+    mov al, 0b00000001
+    out 0x21, al
 
-    ; Send ICW2 - Map IRQs to interrupts 32 to 47
-    mov al, 32         ; IRQ0 will use int 32
-    out PIC1+1, al     ; write to PIC1 data register
-
-    mov al, 40         ; IRQ8 will use int 40
-    out PIC2+1, al     ; write to PIC2 data register
-
-    ; Send ICW3 - Connect both PIC chips
-    mov al, 4          ; Set bit 2 for IR line 2
-    out PIC1+1, al     ; write to PIC1 data register
-
-    mov al, 2          ; Set IR line 2
-    out PIC2+1, al     ; write to PIC2 data register
-
-    ; Send ICW4 - Set PIC to 80x86 mode
-    mov al, ICW4
-    out PIC1+1, al     ; write to PIC1 data register
-
-    mov al, ICW4
-    out PIC2+1, al     ; write to PIC2 data register
-
-    ; Clear the IRQ masks so that all IRQs are enabled
-    mov al, 0x00
-    out PIC1+1, al     ; write to PIC1 data register
-
-    out PIC2+1, al     ; write to PIC2 data register
 
 
     ;; go to kmain function in kernel.c
