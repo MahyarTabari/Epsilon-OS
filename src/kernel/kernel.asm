@@ -4,7 +4,7 @@ KERNEL_CODE_SEG equ 0x08
 KERNEL_DATA_SEG equ 0X10
 
 global _start
-global division_zero
+global test_interrupt
 extern kmain
 global division_by_zero_interrupt_handler
 extern division_by_zero_interrupt_code
@@ -54,9 +54,9 @@ _start:
 ; Align to fill one sector
 times 512-($-$$) db 0
 
-division_zero:
+test_interrupt:
 
-    INT 33  
+    INT 32   
     ret
 
 

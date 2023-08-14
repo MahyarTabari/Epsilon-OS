@@ -1,4 +1,4 @@
-OBJECT_FILES  = ./build/kernel/kernel.asm.o ./build/kernel/kernel.o ./build/include/vga.o ./build/kernel/idt.asm.o ./build/memory/memory.o ./build/kernel/idt.o ./build/io/io.asm.o
+OBJECT_FILES  = ./build/kernel/kernel.asm.o ./build/kernel/kernel.o ./build/include/vga.o ./build/kernel/idt.asm.o ./build/memory/memory.o ./build/kernel/idt.o ./build/io/io.asm.o ./build/memory/heap.o ./build/memory/kheap.o
 FLAGS = -g -ffreestanding -falign-jumps -falign-functions -falign-labels -falign-loops -fstrength-reduce -fomit-frame-pointer -finline-functions -Wno-unused-function -fno-builtin -Werror -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostdlib -nostartfiles -nodefaultlibs -Wall -O0
 INCLUDES = -I./src
 
@@ -31,18 +31,19 @@ all: ./bin/boot.bin ./bin/kernel.bin
 ./build/include/vga.o:	./src/include/vga.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/include/vga.c -o ./build/include/vga.o
 
-./build/include/vga.o:	./src/include/vga.c
-	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/include/vga.c -o ./build/include/vga.o
-
 ./build/memory/memory.o:	./src/memory/memory.c
 	i686-elf-gcc $(INCLUDES) -I./src/memory $(FLAGS) -std=gnu99 -c ./src/memory/memory.c -o ./build/memory/memory.o
 
 ./build/kernel/idt.o:	./src/kernel/idt.c
 	i686-elf-gcc $(INCLUDES) -I./src/kernel $(FLAGS) -std=gnu99 -c ./src/kernel/idt.c -o ./build/kernel/idt.o
+
+./build/memory/heap.o:	./src/memory/heap.c
+	i686-elf-gcc $(INCLUDES) -I./src/memory $(FLAGS) -std=gnu99 -c ./src/memory/heap.c -o ./build/memory/heap.o
+
+./build/memory/kheap.o:	./src/memory/kheap.c
+	i686-elf-gcc $(INCLUDES) -I./src/memory $(FLAGS) -std=gnu99 -c ./src/memory/kheap.c -o ./build/memory/kheap.o
+
 clean:
-	rm -rf ./bin/boot.bin
-	rm -rf ./bin/kernel.bin
-	rm -rf ./bin/os.bin
 	rm -rf ./build
 	rm -rf ./bin
 

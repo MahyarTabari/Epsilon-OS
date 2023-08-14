@@ -5,6 +5,9 @@
 #include "idt.h"
 #include "config.h"
 #include "../io/io.h"
+#include "../memory/kheap.h"
+#include "../memory/heap.h"
+
 int current_video_memory_row = 0;
 int current_video_memory_col = 0;
 
@@ -156,12 +159,17 @@ void keyboard_irq_code()
     print_str_terminal("keybaord is pressed!\n");
 }
 
+extern void test_interrupt();
 
 void kmain()
 {
 
     initialize_terminal();
     print_str_terminal("we are in main\n");
+
+    initialize_kheap();
+    print_str_terminal("kheap is set up\n");
+
     initialize_idt();
     print_str_terminal("idt is initialized\n");
 
@@ -173,6 +181,15 @@ void kmain()
     // int 0-31 are working,
     // but int 32-47 (IRQ's) are not working
     // it seems that the problem is due to mapping in kernel.asm 
-    test_interrupt();
+    //test_interrupt();
+
+    void* ptr = kmalloc(5000);      //0x1000000
+    void* ptr2 = kmalloc(2);        //0x1002000
+
+    kfree(ptr2);
+    void* ptr3 = kmalloc(3);        //0x1002000
+
+    // to be able to compile(unused variables)
+    if (ptr || ptr2 || ptr3);
 
 }
