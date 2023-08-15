@@ -1,6 +1,6 @@
 #include "idt.h"
-#include "config.h"
-#include "../memory/memory.h"
+#include "../config.h"
+#include "../../memory/memory.h"
 
 #define KERNEL_CODE_SEG 0x08
 

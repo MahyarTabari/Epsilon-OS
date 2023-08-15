@@ -1,7 +1,7 @@
 #include "heap.h"
-#include "memory.h"
-#include "../kernel/config.h"
-#include "../kernel/status.h"
+#include "../memory.h"
+#include "../../kernel/config.h"
+#include "../../kernel/status.h"
 
 int validate_heap_size(size_t size)
 {   
