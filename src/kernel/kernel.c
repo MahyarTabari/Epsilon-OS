@@ -2,16 +2,18 @@
 #include <stdint.h>
 #include "../include/vga.h"
 #include "../include/type.h"
-#include "idt.h"
+#include "./idt/idt.h"
 #include "config.h"
 #include "../io/io.h"
-#include "../memory/kheap.h"
-#include "../memory/heap.h"
+#include "../memory/heap/kheap.h"
+#include "../memory/heap/heap.h"
+#include "../memory/paging/paging.h"
 
 int current_video_memory_row = 0;
 int current_video_memory_col = 0;
 
 
+static struct four_gb_virtual_memory* kernel_vm;
 // test function for interrupt 0,
 // defined in "kernel.asm"
 extern void division_zero();
@@ -173,23 +175,23 @@ void kmain()
     initialize_idt();
     print_str_terminal("idt is initialized\n");
 
+    kernel_vm = new_four_gb_virtual_memory((uint8_t)(PAGING_PAGE_SIZE | PAGING_IS_PRESENT | PAGING_ACCESS_BY_ALL));
+    print_str_terminal("kernel virtual memroy is created\n");
+
+    switch_paging(kernel_vm);
+    print_str_terminal("switched to kernel virtual memroy\n");
+
+    enable_paging();
+    print_str_terminal("paging is enabled\n");
+
     // enabling interrupts using sti instruction is needed,
     // otherwise interrupts will be ignored
-    enable_interrupts();
-    print_str_terminal("interrupts are enabled\n");
+    //enable_interrupts();
+    //print_str_terminal("interrupts are enabled\n");
 
     // int 0-31 are working,
     // but int 32-47 (IRQ's) are not working
     // it seems that the problem is due to mapping in kernel.asm 
     //test_interrupt();
-
-    void* ptr = kmalloc(5000);      //0x1000000
-    void* ptr2 = kmalloc(2);        //0x1002000
-
-    kfree(ptr2);
-    void* ptr3 = kmalloc(3);        //0x1002000
-
-    // to be able to compile(unused variables)
-    if (ptr || ptr2 || ptr3);
 
 }

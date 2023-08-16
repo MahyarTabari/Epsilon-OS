@@ -12,6 +12,7 @@ if [[ ! -d ./build ]]; then
 	mkdir ./build/include
 	mkdir ./build/memory
 	mkdir ./build/memory/heap
+	mkdir ./build/memory/paging
 	mkdir ./build/io
 
 fi
