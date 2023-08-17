@@ -48,7 +48,13 @@ extern void load_page_directory(page_directory_entry* page_directory_address);
  * @param   vm      new virtual memroy to switch on
  * @return  void
  */
+
+
 void switch_paging(struct four_gb_virtual_memory* vm);
 
+uint32_t get_directory_index(void* virtual_address);
 
+uint32_t get_table_index(void* virtual_address);
+
+void set_virtual_address(struct four_gb_virtual_memory* vm, void* virtual_address, void* physical_address, uint8_t flags);
 #endif

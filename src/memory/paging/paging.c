@@ -49,3 +49,32 @@ void switch_paging(struct four_gb_virtual_memory* vm)
     load_page_directory(vm->entries);
     return;
 }
+
+uint32_t get_directory_index(void* virtual_address)
+{
+    uint32_t res = ((uint32_t)virtual_address) >> 22;
+
+    return res;
+}
+
+uint32_t get_table_index(void* virtual_address)
+{
+    uint32_t res = (((uint32_t)virtual_address) << 10) >> 22;
+
+    return res;
+}
+
+void set_virtual_address(struct four_gb_virtual_memory* vm, void* virtual_address, void* physical_address, uint8_t flags)
+{
+
+    int directoy_index = get_directory_index(virtual_address);
+    int table_index = get_table_index(virtual_address);
+
+    page_directory_entry* directory = vm->entries;
+
+    page_table_entry* table = (page_table_entry*)(directory[directoy_index] & 0xfffff000);
+
+    table[table_index] = ((uint32_t)physical_address) | flags;
+
+    return;
+}
