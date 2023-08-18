@@ -16,7 +16,7 @@ enable_paging:
 
     mov eax, cr0
     ;; set the paging and protection bits of cr0
-    or eax, 0x8000001
+    or eax, 0x80000001
     mov cr0, eax
 
     pop ebp

@@ -2,6 +2,7 @@
 #define PAGING_H
 
 #include <stdint.h>
+#include "../../kernel/status.h"
 
 #define PAGING_IS_PRESENT                   0b00000001
 #define PAGING_READ_WRITE                   0b00000010
@@ -48,13 +49,42 @@ extern void load_page_directory(page_directory_entry* page_directory_address);
  * @param   vm      new virtual memroy to switch on
  * @return  void
  */
-
-
 void switch_paging(struct four_gb_virtual_memory* vm);
 
+/*
+ * get the directory index of the given virtual address
+ * bits 22 to 31
+ *
+ * @param   virtual_address     virtual address
+ * @return  void
+ */
 uint32_t get_directory_index(void* virtual_address);
 
+/*
+ * get the page index of the given virtual address
+ * bits 12 to 21
+ * 
+ * @param   virtual_address     virtual address
+ * @return  table index
+ */
 uint32_t get_table_index(void* virtual_address);
 
-void set_virtual_address(struct four_gb_virtual_memory* vm, void* virtual_address, void* physical_address, uint8_t flags);
+/*
+ * check whether the given address can be the address of the first byte of a block
+ * 
+ * @param   address     address to be tested
+ * @return  int         1 if ture, 0 if false  
+ */
+int is_aligned(void* address);
+
+/*
+ * switch current virtual memory to the given virtual memory
+ *
+ * @param   vm                  the virtual memory to be modified
+ * @param   virtual_address     the virtual address of the first byte of the block(it must be aligned(divisable by block size))
+ * @param   physical_address    the physical address of the first byte of the block(it must be aligned(divisable by block size))
+ * @param   flags               flags can be set by macros defined in paging.h
+ * @return  int                 0 if Ok, negative otherwise
+ */
+int set_virtual_address(struct four_gb_virtual_memory* vm, void* virtual_address, void* physical_address, uint8_t flags);
 #endif

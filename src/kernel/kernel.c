@@ -175,7 +175,7 @@ void kmain()
     initialize_idt();
     print_str_terminal("idt is initialized\n");
 
-    kernel_vm = new_four_gb_virtual_memory((uint8_t)(PAGING_READ_WRITE | PAGING_IS_PRESENT | PAGING_ACCESS_BY_ALL));
+    kernel_vm = new_four_gb_virtual_memory((uint32_t)(PAGING_READ_WRITE | PAGING_IS_PRESENT | PAGING_ACCESS_BY_ALL));
     print_str_terminal("kernel virtual memroy is created\n");
 
     switch_paging(kernel_vm);
@@ -186,9 +186,10 @@ void kmain()
 
     char* ptr = kzalloc(100);
 
-    set_virtual_address(kernel_vm, (void*)0x2000000, ptr, PAGING_READ_WRITE | PAGING_IS_PRESENT | PAGING_ACCESS_BY_ALL);
+    // we've set virtual address 0x20000 to point to the physical address pointed to by ptr
+    set_virtual_address(kernel_vm, (void*)0x20000, ptr, PAGING_READ_WRITE | PAGING_IS_PRESENT | PAGING_ACCESS_BY_ALL);
     
-    char* virt_addr = (char*)0x2000000;
+    char* virt_addr = (char*)0x20000;
 
     virt_addr[0] = 'A';
 
