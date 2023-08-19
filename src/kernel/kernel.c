@@ -8,6 +8,7 @@
 #include "../memory/heap/kheap.h"
 #include "../memory/heap/heap.h"
 #include "../memory/paging/paging.h"
+#include "../io/disk/disk.h"
 
 int current_video_memory_row = 0;
 int current_video_memory_col = 0;
@@ -184,16 +185,8 @@ void kmain()
     enable_paging();
     print_str_terminal("paging is enabled\n");
 
-    char* ptr = kzalloc(100);
-
-    // we've set virtual address 0x20000 to point to the physical address pointed to by ptr
-    set_virtual_address(kernel_vm, (void*)0x20000, ptr, PAGING_READ_WRITE | PAGING_IS_PRESENT | PAGING_ACCESS_BY_ALL);
-    
-    char* virt_addr = (char*)0x20000;
-
-    virt_addr[0] = 'A';
-
-    print_str_terminal(ptr);
+    char buf[512];
+    ata_lba_read(1, 1, buf);
 
     // enabling interrupts using sti instruction is needed,
     // otherwise interrupts will be ignored
