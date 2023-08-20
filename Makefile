@@ -1,4 +1,4 @@
-OBJECT_FILES  = ./build/kernel/kernel.asm.o ./build/kernel/kernel.o ./build/include/vga.o ./build/kernel/idt/idt.asm.o ./build/memory/memory.o ./build/kernel/idt/idt.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.o ./build/memory/paging/paging.asm.o ./build/io/disk/disk.asm.o
+OBJECT_FILES  = ./build/kernel/kernel.asm.o ./build/kernel/kernel.o ./build/include/vga.o ./build/kernel/idt/idt.asm.o ./build/memory/memory.o ./build/kernel/idt/idt.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o ./build/memory/paging/paging.o ./build/memory/paging/paging.asm.o
 FLAGS = -g -ffreestanding -falign-jumps -falign-functions -falign-labels -falign-loops -fstrength-reduce -fomit-frame-pointer -finline-functions -Wno-unused-function -fno-builtin -Werror -Wno-unused-label -Wno-cpp -Wno-unused-parameter -nostdlib -nostartfiles -nodefaultlibs -Wall -O0
 INCLUDES = -I./src
 
@@ -23,9 +23,6 @@ all: ./bin/boot.bin ./bin/kernel.bin
 
 ./build/memory/paging/paging.asm.o:
 	nasm -f elf -g ./src/memory/paging/paging.asm -o ./build/memory/paging/paging.asm.o
-
-./build/io/disk/disk.asm.o:
-	nasm -f elf -g ./src/io/disk/disk.asm -o ./build/io/disk/disk.asm.o
 
 ./build/kernel/kernel.o:
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel/kernel.c -o ./build/kernel/kernel.o
