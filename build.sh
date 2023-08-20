@@ -14,7 +14,7 @@ if [[ ! -d ./build ]]; then
 	mkdir ./build/memory/heap
 	mkdir ./build/memory/paging
 	mkdir ./build/io
-
+	mkdir ./build/io/disk
 fi
 
 if [[ ! -d ./bin ]]; then
