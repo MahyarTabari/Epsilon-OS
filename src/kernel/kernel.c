@@ -185,7 +185,7 @@ void kmain()
     enable_paging();
     print_str_terminal("paging is enabled\n");
 
-    char buff[512];
+    ch,ar buff[512];
     ata_lba_read(1, 1, buff);
 
     print_str_terminal("read from the disk was successfully");

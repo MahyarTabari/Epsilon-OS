@@ -17,6 +17,6 @@
 
 #define WORDS_PER_SECTOR                                                            256
 
-void ata_lba_read(uint32_t lba, uint8_t total, void* buf);
+void ata_lba_read(int lba, int total, void* buf);
 
 #endif

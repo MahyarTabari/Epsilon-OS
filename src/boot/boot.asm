@@ -398,25 +398,12 @@ load_gdtr:
 [BITS 32]
 load32:
 
-; cylinder = 0
-; Head	   = 0
-; sector   = 2 (sector 1 is MBR)
-mov ebx, 2
+    mov eax, 1
+    mov ecx, 100
+    mov edi, 0x100000
 
-; # sectors to read = 100
-xor ecx, ecx
-mov ch, 100
+    call ata_lba_read
 
-; the address we want to load the kernel into
-mov edi, 0x0100000
-
-
-;;; for ata_lba ;;;
-;mov eax, 1
-;mov ecx, 100
-;mov edi, 0x0100000
-
-call ata_chs_read
 
 ; jump to the kernel code.
 ; we use the KERNEL_CODE_SEG segment which is the offset to the GDT,
@@ -426,7 +413,7 @@ call ata_chs_read
 ; Note: in protected mode the segment part of the address is offset to GDT.
 
 ; _start is the entry point of kerenl 
-jmp KERNEL_CODE_SEG:0x0100000
+    jmp KERNEL_CODE_SEG:0x0100000
 
 
 
@@ -458,70 +445,73 @@ jmp KERNEL_CODE_SEG:0x0100000
 ;
 
 
-ata_chs_read:
-    push eax
-    push ebx
-    push ecx
-    push edx
-    push edi
 
 
-    mov eax, ebx
-    and ah, 0b00001111          ; only keep the lower nibble(which is head)
-    or ah, 0b10100000           ; make the higher nibble 0b1010 for reading from the disk
-    mov dx, 0x1f6
-    mov al, ah
-    out dx, al
-    
-    mov al, ch          	; number of sectors to read
-    mov dx, 0x1f2
-    out dx, al
-    
-    mov eax, ebx                ; starting sector
-    mov dx, 0x1f3
+
+;
+; ATA read sectors (LBA mode)
+; 
+; @param    eax     logical block address
+; @param    cl      number of sectors to read
+; @param    edi     the address to load into it
+;
+ata_lba_read:
+    and eax, 0x0fffffff
+
+    ; save eax in ebx
+    mov ebx, eax
+
+    ; send bits 24 to 27 in lower nibble
+    ; and 0b1110 in upper nibble
+    mov dx, 0x01f6
+    shr eax, 24
+    or al, 0b11100000
     out dx, al
 
-    mov eax, ebx         	; cylinder low byte
-    shr eax, 16
+    ; send number of sectors to read
+    mov dx, 0x01f2
+    mov al, cl
+    out dx, al
+
+    ; move bits 8 to 15
     mov dx, 0x1f4
-    out dx, al
-
-    mov dx, 0x1f5		; cylinder high byte
+    mov eax, ebx
     shr eax, 8
     out dx, al
 
-
-    mov al, 0x20		; read with retry command
+    ; move bits 16 to 23
+    mov dx, 0x1f5
+    mov eax, ebx
+    shr eax, 16
+    out dx, al
+    
+    ; send read with retry command to command port
     mov dx, 0x1f7
+    mov al, 0x20
     out dx, al
 
-.loop:
-    in al, dx		
+.next_sector:
+    push ecx
+
+.wait:
+    mov dx, 0x1f7
+    ; wait until the bit 3 is set
+    in al, dx
     test al, 8
-    jz .loop
+    jz .wait
 
-    mov eax, 512/2      ; eax contains the number of words per sector
+    ; ecx is counter for insw
+    mov ecx, 256
 
-    xor ebx, ebx        ; make ebx 0
-    mov bl, ch          ; bl contains the number of sectors to read     
-    mul bx              ; al = al * bl : total_number_of_word = number_of_words_in_sector * numbr_of_sector
+    ; read form data port
+    mov dx, 0x1f0
 
-    mov ecx, eax        ; rep instruction repeats insw 'rcx' times
-                        ; (i.e. it reads n words where n is the total number of words to read)
-    mov edx, 0x1f0
-    rep insw            ; [es:edi] <- word_read_from_disk , edi <- edi + 2(becuase we are reading word(2bytes))
-
-
-    pop edi
-    pop edx
+    ; read 'ecx' words pointed to by 'edi'
+    rep insw
     pop ecx
-    pop ebx
-    pop eax
+    loop .next_sector
 
     ret
-    
-    
-    
 ; Padding Remaining Bytes Of The Sector With Zero - except last 2 bytes for boot signature
 times 510-($-$$) db 0
 
