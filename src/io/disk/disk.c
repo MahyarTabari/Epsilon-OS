@@ -15,7 +15,7 @@ void ata_lba_read(uint32_t lba, uint8_t total_sectors_to_read, void* buf)
     {
         uint8_t test = insb(READ_ATA_LBA_PORT_TO_SEND_COMMAND);
         // wait until the bit 3 is set
-        while (!(test & READ_ATA_LBA_MASK_READY_TO_READ))
+        while ((test & READ_ATA_LBA_MASK_READY_TO_READ) == 0b00000000)
         {
             test = insb(READ_ATA_LBA_PORT_TO_SEND_COMMAND);
         }
