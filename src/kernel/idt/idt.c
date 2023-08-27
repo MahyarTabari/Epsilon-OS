@@ -1,7 +1,8 @@
 #include "idt.h"
 #include "../config.h"
 #include "../../memory/memory.h"
-
+#include "../kernel.h"
+#include "../../io/io.h"
 #define KERNEL_CODE_SEG 0x08
 
 
@@ -85,6 +86,27 @@ void set_idtr()
 extern void no_interrupt_handler();
 extern void division_by_zero_interrupt_handler();
 extern void keyboard_irq_handler();
+
+
+void no_interrupt_code()
+{
+    outb(0x20, 0x20);   
+}
+
+// test function for IDT
+void division_by_zero_interrupt_code()
+{
+    print_str_terminal("division by zero interrupt\n");
+    outb(0x20, 0x20);
+}
+
+
+void keyboard_irq_code()
+{
+    print_str_terminal("keybaord is pressed!\n");
+    outb(0x20, 0x20);
+}
+
 void initialize_idt()
 {
     set_idtr();
