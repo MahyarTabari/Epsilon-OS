@@ -8,6 +8,7 @@
 #include "../memory/heap/kheap.h"
 #include "../memory/heap/heap.h"
 #include "../memory/paging/paging.h"
+#include "../io/disk/disk.h"
 
 int current_video_memory_row = 0;
 int current_video_memory_col = 0;
@@ -149,18 +150,6 @@ void print_str_terminal(char* str)
 }
 
 
-// test function for IDT
-void division_by_zero_interrupt_code()
-{
-    print_str_terminal("division by zero interrupt\n");
-}
-
-
-void keyboard_irq_code()
-{
-    print_str_terminal("keybaord is pressed!\n");
-}
-
 extern void test_interrupt();
 
 void kmain()
@@ -184,25 +173,18 @@ void kmain()
     enable_paging();
     print_str_terminal("paging is enabled\n");
 
-    char* ptr = kzalloc(100);
+    //char buff[512];
+    //ata_lba_read(1, 1, buff);
 
-    // we've set virtual address 0x20000 to point to the physical address pointed to by ptr
-    set_virtual_address(kernel_vm, (void*)0x20000, ptr, PAGING_READ_WRITE | PAGING_IS_PRESENT | PAGING_ACCESS_BY_ALL);
-    
-    char* virt_addr = (char*)0x20000;
-
-    virt_addr[0] = 'A';
-
-    print_str_terminal(ptr);
-
+    //print_str_terminal("read from the disk was successfully");
     // enabling interrupts using sti instruction is needed,
     // otherwise interrupts will be ignored
-    //enable_interrupts();
-    //print_str_terminal("interrupts are enabled\n");
+    enable_interrupts();
+    print_str_terminal("interrupts are enabled\n");
 
     // int 0-31 are working,
     // but int 32-47 (IRQ's) are not working
     // it seems that the problem is due to mapping in kernel.asm 
-    //test_interrupt();
+    test_interrupt();
 
 }

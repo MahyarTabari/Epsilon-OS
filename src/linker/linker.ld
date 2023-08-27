@@ -3,8 +3,7 @@ OUTPUT_FORMAT(binary)
 
 SECTIONS
 {
-    . = 0X100000;
-
+    . = 1M;
     .text : ALIGN(4096)
     {
         *(.text)

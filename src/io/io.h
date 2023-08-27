@@ -9,7 +9,7 @@
  * @param   out         the byte to be sent       
  * @return  void    
  */
-extern void outb(uint32_t port, uint32_t out);
+extern void outb(unsigned short port, unsigned char out);
 
 /*
  * ouputs a word to the specified port
@@ -18,7 +18,7 @@ extern void outb(uint32_t port, uint32_t out);
  * @param   out         the word to be sent       
  * @return  void   
  */
-extern void outw(uint32_t port, uint32_t );
+extern void outw(unsigned short port, unsigned short out);
 
 /*
  * ouputs 4 bytes(double word) to the specified port
@@ -27,7 +27,7 @@ extern void outw(uint32_t port, uint32_t );
  * @param   out         the double word to be sent       
  * @return  void    
  */
-extern void outdw(uint32_t port, uint32_t out);
+extern void outdw(unsigned short port, unsigned  out);
 
 
 /*
@@ -36,7 +36,7 @@ extern void outdw(uint32_t port, uint32_t out);
  * @param   port        port to read the byte     
  * @return  byte read form the specified port   
  */
-extern uint32_t insb(uint32_t port);
+extern unsigned char insb(unsigned short port);
 
 /*
  * reads one byte from the specified port
@@ -44,7 +44,7 @@ extern uint32_t insb(uint32_t port);
  * @param   port        port to read the word     
  * @return  word read form the specified port   
  */
-extern uint32_t insw(uint32_t port);
+extern uint16_t insw(unsigned short port);
 
 /*
  * reads one byte from the specified port

@@ -6,10 +6,7 @@ KERNEL_DATA_SEG equ 0X10
 global _start
 global test_interrupt
 extern kmain
-global division_by_zero_interrupt_handler
-extern division_by_zero_interrupt_code
-global keyboard_irq_handler
-extern keyboard_irq_code
+
 _start:
     ;set the segment registers(except code segment which is already set)
     cli
@@ -58,33 +55,3 @@ test_interrupt:
 
     INT 32   
     ret
-
-
-division_by_zero_interrupt_handler:
-    cli
-    pushad
-
-    call division_by_zero_interrupt_code
-
-    mov al, 0x20
-    out 0x20, al
-    popad
-    sti
-    iret
-
-
-;; this is a wrapper for keyboard_irq_code function
-;; because interrupts need iret to return
-;; and we can't do that in C
-keyboard_irq_handler:
-    cli
-    pushad
-
-    call keyboard_irq_code
-
-    mov al, 0x20
-    out 0x20, al
-
-    popad
-    sti
-    iret

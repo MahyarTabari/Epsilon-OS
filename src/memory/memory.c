@@ -10,7 +10,7 @@
  */
 void* memset(void* s, int c, int n)
 {   
-    char* ptr = (char*)ptr;
+    char* ptr = (char*)s;
     for (int i = 0 ; i < n ; i++)
     {
         ptr[i] = (char)c;
